@@ -2,28 +2,32 @@
 #include <stdlib.h>
 #include "arvoreb.h"
 
-/* Pesquisa sequencial para encontrar o intervalo na pagina [cite: 298, 300] */
+// Pesquisa recursiva clássica de árvore B. Varre a página e decide para qual filho descer.
 void Pesquisa(Registro *x, TipoApontador Ap) {
     long i = 1;
     if (Ap == NULL) {
-        x->chave = -1; /* Sinaliza que nao encontrou */
+        x->chave = -1; // Se chegou no fim e não achou, invalida a chave de retorno
         return;
     }
+    
+    // Caminha dentro da página enquanto a chave procurada for maior
     while (i < Ap->n && x->chave > Ap->r[i-1].chave) i++;
 
+    // Se achou a chave exata dentro desta página, retorna o registro completo
     if (x->chave == Ap->r[i-1].chave) {
-        *x = Ap->r[i-1]; /* Chave localizada [cite: 301, 302] */
+        *x = Ap->r[i-1];
         return;
     }
 
-    /* Ativacao recursiva na subarvore adequada [cite: 307, 308] */
+    // Se não achou aqui, desce para o filho à esquerda ou à direita do intervalo
     if (x->chave < Ap->r[i-1].chave) Pesquisa(x, Ap->p[i-1]);
     else Pesquisa(x, Ap->p[i]);
 }
 
-/* Funcao auxiliar para inserir ordenadamente na pagina [cite: 382, 394] */
+// Função para enfiar um novo registro na página mantendo a ordenação das chaves
 void InsereNaPagina(TipoApontador Ap, Registro Reg, TipoApontador ApDir) {
     int k = Ap->n;
+    // Puxa os registros maiores para a direita para abrir espaço
     while (k > 0) {
         if (Reg.chave >= Ap->r[k-1].chave) break;
         Ap->r[k] = Ap->r[k-1];
