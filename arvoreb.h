@@ -2,15 +2,16 @@
 #define ARVOREB_H
 #include "registro.h"
 
-#define M 50      /* Ordem da arvore */
+#define M 50      // Ordem da árvore
 #define MM (2 * M)
 
-/* Estrutura da pagina conforme slide 23 [cite: 268] */
 typedef struct TipoPagina* TipoApontador;
+
+// Estrutura do nó da Árvore B. Cada nó (página) armazena vários registros.
 typedef struct TipoPagina {
-    short n;                /* Numero de itens na pagina [cite: 268] */
-    Registro r[MM];         /* Vetor de registros [cite: 269] */
-    TipoApontador p[MM + 1]; /* Vetor de filhos [cite: 270] */
+    short n;                // Quantos registros estão ocupados na página
+    Registro r[MM];         // O array de registros físicos
+    TipoApontador p[MM + 1]; // Os ponteiros para as subárvores filhas
 } TipoPagina;
 
 void Insere(Registro Reg, TipoApontador *Ap);
