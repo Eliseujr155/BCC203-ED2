@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "acessoSequencial.h"
 
-/* Gera a tabela de indice das paginas lendo o arquivo [cite: 174, 178] */
+// Função que varre o arquivo original para montar a tabela de índices na memória RAM
 int criarIndicePaginas(const char *nomeArquivo, tipoindice tabela[], int numRegistros) {
     FILE *arq = fopen(nomeArquivo, "rb");
     if (!arq) return 0;
@@ -10,7 +10,7 @@ int criarIndicePaginas(const char *nomeArquivo, tipoindice tabela[], int numRegi
     int pos = 0, cont = 0;
     Registro x;
     
-    /* Le o arquivo e guarda a primeira chave de cada pagina no indice [cite: 176, 177] */
+    // Lê o registro e, se for o primeiro de uma página, guarda a chave e a posição no índice
     while (fread(&x, sizeof(Registro), 1, arq) == 1 && cont < numRegistros) {
         if (cont % ITENSPAGINA == 0) {
             tabela[pos].chave = x.chave;
@@ -20,26 +20,27 @@ int criarIndicePaginas(const char *nomeArquivo, tipoindice tabela[], int numRegi
         cont++;
     }
     fclose(arq);
-    return pos; /* Retorna o tamanho preenchido da tabela */
+    return pos; // Retorna quantas páginas foram indexadas
 }
 
-/* Localiza a pagina no indice e depois pesquisa no disco [cite: 124, 130] */
+// Faz a busca em duas etapas: primeiro no índice em RAM, depois no bloco específico no disco
 Registro* pesquisaSequencial(const char *nomeArquivo, int chave, tipoindice tabela[], int tam) {
     int i = 0;
-    /* Procura no indice a pagina que pode conter o item [cite: 130] */
+    
+    // Procura no índice qual página pode conter a nossa chave
     while (i < tam && tabela[i].chave <= chave) i++;
 
-    if (i == 0) return NULL; /* Chave menor que a primeira do arquivo [cite: 133] */
+    if (i == 0) return NULL; // A chave é menor que a primeira chave do arquivo
 
     FILE *arq = fopen(nomeArquivo, "rb");
     Registro *pagina = malloc(ITENSPAGINA * sizeof(Registro));
     
-    /* Posiciona o ponteiro no inicio da pagina selecionada [cite: 147, 148] */
+    // Pula direto para o local da página no arquivo binário usando o deslocamento
     long desloc = (long)(tabela[i-1].posicao - 1) * ITENSPAGINA * sizeof(Registro);
     fseek(arq, desloc, SEEK_SET);
     int lidos = fread(pagina, sizeof(Registro), ITENSPAGINA, arq);
 
-    /* Pesquisa sequencial dentro da pagina carregada [cite: 151, 152] */
+    // Agora faz a busca sequencial apenas dentro daqueles 4 registros da página
     for (int j = 0; j < lidos; j++) {
         if (pagina[j].chave == chave) {
             Registro *res = malloc(sizeof(Registro));
