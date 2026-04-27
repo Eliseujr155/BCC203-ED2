@@ -1,12 +1,12 @@
 #ifndef REGISTRO_H
 #define REGISTRO_H
 
-/* Estrutura do registro definida conforme a especificacao do TP */
+// Estrutura principal do registro seguindo os tamanhos pedidos no trabalho
 typedef struct {
-    int chave;          /* Campo chave de pesquisa */
-    long int dado1;     /* Valor inteiro longo */
-    char dado2[1000];   /* Cadeia de 1000 caracteres */
-    char dado3[5000];   /* Cadeia de 5000 caracteres */
+    int chave;          // Chave usada na pesquisa
+    long int dado1;     
+    char dado2[1000];   // Strings grandes para simular arquivo pesado
+    char dado3[5000]; 
 } Registro;
 
 #endif
