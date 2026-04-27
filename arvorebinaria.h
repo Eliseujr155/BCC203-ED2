@@ -2,11 +2,10 @@
 #define ARVOREBINARIA_H
 #include "registro.h"
 
-/* No da arvore adaptado para armazenar enderecos de disco  */
-typedef struct {
+ // No da arvore adaptado para armazenar enderecos de disco  
     Registro registro;
-    long esquerda;  /* Posicao no arquivo (-1 para NULL) */
-    long direita;   /* Posicao no arquivo (-1 para NULL) */
+    long esquerda;  // Posicao no arquivo (-1 para NULL) 
+    long direita;   // Posicao no arquivo (-1 para NULL) 
 } NoArquivo;
 
 void inserirBinaria(const char *nomeArq, Registro reg);
