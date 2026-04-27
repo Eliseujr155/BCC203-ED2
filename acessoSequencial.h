@@ -2,15 +2,14 @@
 #define ACESSOSEQUENCIAL_H
 #include "registro.h"
 
-#define ITENSPAGINA 4 /* Tamanho da pagina conforme slide 11 */
+#define ITENSPAGINA 4 // Cada página no disco terá 4 registros
 
-/* Estrutura para entrada da tabela de indice das paginas [cite: 116] */
+// Estrutura do índice que fica na RAM para não precisar ler o arquivo todo
 typedef struct {
-    int posicao; /* Endereco da pagina no disco */
-    int chave;   /* Chave do primeiro item da pagina */
+    int posicao; // Qual é a página no arquivo
+    int chave;   // Menor chave daquela página
 } tipoindice;
 
-/* Funcoes principais do metodo */
 int criarIndicePaginas(const char *nomeArquivo, tipoindice tabela[], int numRegistros);
 Registro* pesquisaSequencial(const char *nomeArquivo, int chave, tipoindice tabela[], int tam);
 
