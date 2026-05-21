@@ -1,16 +1,36 @@
 #ifndef ACESSOSEQUENCIAL_H
 #define ACESSOSEQUENCIAL_H
-#include "registro.h"
+#include "tempo.h"
 
-#define ITENSPAGINA 4 // Cada página no disco terá 4 registros
+#define ITENSPAGINA 4
+#define MAXTABELA 100
 
-// Estrutura do índice que fica na RAM para não precisar ler o arquivo todo
 typedef struct {
-    int posicao; // Qual é a página no arquivo
-    int chave;   // Menor chave daquela página
-} tipoindice;
+    int posicao;      
+    int chave;        
+} TipoIndice;
 
-int criarIndicePaginas(const char *nomeArquivo, tipoindice tabela[], int numRegistros);
-Registro* pesquisaSequencial(const char *nomeArquivo, int chave, tipoindice tabela[], int tam);
+// O TipoItem PRECISA refletir o novo tamanho do Registro
+typedef struct {
+    int chave;
+    long int dado1;
+    char dado2[1000];
+    char dado3[5000];
+} TipoItem;
+
+typedef struct {
+    TipoItem itens[ITENSPAGINA];
+    int numItens;  
+} PaginaAS;
+
+int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[], int numRegistros, long *transferencias, double *tempoCriacao);
+int buscarPaginaNoIndice(int chave, TipoIndice tabela[], int numPaginas, long *comp);
+int carregarPagina(const char *nomeArquivo, int numPagina, PaginaAS *paginaAlvo, int numRegistros, long *transferencias);
+int buscarNaPagina(int chave, PaginaAS *pag, long *comp, TipoItem *resultado);
+
+void lerArquivoSequencial(const char *nomeArquivo, int quantidade, int chave, long *transferencias, long *comp, double *tempo, TipoItem *resultado, int *encontrado, TipoIndice *tabelaIndice, int numPaginas);
+
+void pesquisar10AleatoriasSI(const char *nomeArquivo, int quantidade);
+void executarSequencial(const char *nomeArquivo, int quantidade, int chave, int modoTeste, int imprimirChaves);
 
 #endif
