@@ -1,29 +1,36 @@
 #ifndef ARVOREBESTRELA_H
 #define ARVOREBESTRELA_H
 #include "registro.h"
+#include "tempo.h"
 
-#define MM 100 
+#define VERDADEIRO 1
+#define FALSO 0
+#define ORDEM_ESTRELA 50 
+#define MM_ESTRELA (2 * ORDEM_ESTRELA)
 
-// Define se a página é um nó de índice (só chaves) ou folha (dados completos)
-typedef enum {Interna, Externa} TipoIntExt;
+typedef enum { Interna, Externa } TipoPaginaEstrela;
 
-typedef struct TipoPaginaEstrela* TipoApontadorEstrela;
-
-typedef struct TipoPaginaEstrela {
-    TipoIntExt Pt; // Variável para controle do tipo do nó
+typedef struct PaginaEstrela {
+    TipoPaginaEstrela tipo;
     union {
-        struct { // Estrutura para os nós de cima (índice)
-            int ni;
-            int ri[MM]; // Guarda apenas os inteiros das chaves para economizar RAM
-            TipoApontadorEstrela pi[MM + 1];
-        } U0;
-        struct { // Estrutura para os nós folha (onde o registro de 6kb realmente está)
-            int ne;
-            Registro re[MM];
-        } U1;
-    } UU;
-} TipoPaginaEstrela;
+        struct {
+            int numChaves;
+            int chaves[MM_ESTRELA]; 
+            struct PaginaEstrela *filhos[MM_ESTRELA + 1]; 
+        } interna;
+        struct {
+            int numRegistros; 
+            Registro registros[MM_ESTRELA]; 
+        } externa;
+    } conteudo;
+} PaginaEstrela;
 
-void PesquisaEstrela(Registro *x, TipoApontadorEstrela *Ap);
+Registro* pesquisaBEstrela(PaginaEstrela *pagina, int chave, long *comparacoes);
+void insereBEstrela(Registro reg, PaginaEstrela **raiz, long *comparacoes);
+void lerArquivoArvoreBEstrela(const char *nomeArquivo, int numRegistros, PaginaEstrela **raiz, long *transferencias, long *comparacoes, double *tempo);
+
+// Alterado para 10 chaves (Fase 2)
+void pesquisar10AleatoriasBEstrela(const char *nomeArquivo, int numRegistros, PaginaEstrela *raiz);
+void executarArvoreBEstrela(const char *nomeArquivo, int quantidade, int chave, int modoTeste, int imprimirChaves);
 
 #endif
