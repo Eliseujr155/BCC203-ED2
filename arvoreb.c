@@ -23,13 +23,13 @@ Registro* pesquisa(Pagina *pagina, int chave, long *comp) {
 void InsereNaPagina(Pagina *ap, Registro Reg, Pagina *apDir){
     int k = ap->n;
     while (k > 0) {
-        if (Reg.chave >= ap->registro[k-1].chave) break;
-        ap->registro[k] = ap->registro[k - 1];
-        ap->filhos[k + 1] = ap->filhos[k];
-        k--;
+        if (Reg.chave >= ap->registro[k-1].chave) break; 
+        ap->registro[k] = ap->registro[k - 1]; //maior registro é passado pra frente
+        ap->filhos[k + 1] = ap->filhos[k]; // filho direito do maior registro é passado pra frente
+        k--; // decrementa pra verificar posição anterior
     }
-    ap->registro[k] = Reg; 
-    ap->filhos[k + 1] = apDir;
+    ap->registro[k] = Reg; //colocado na frente do registro em que foi maior
+    ap->filhos[k + 1] = apDir; //filho acompanha
     ap->n++;
 }
 
