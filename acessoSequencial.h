@@ -2,15 +2,19 @@
 #define ACESSOSEQUENCIAL_H
 #include "tempo.h"
 
-#define ITENSPAGINA 4
+//fixa 4 como numero de registro por pagina
+#define ITENSPAGINA 4 
 #define MAXTABELA 100
 
+
+// estrutura de feinição do formato, vai guardar o numero da pagina e a menor chave 
 typedef struct {
     int posicao;      
     int chave;        
 } TipoIndice;
 
-// O TipoItem PRECISA refletir o novo tamanho do Registro
+// tipoitem redefine a extrutura do registro pois tem que ser identico pro sizeof 
+// dar os mesmos 6kb garantindo que não de erro na leitura do fread 
 typedef struct {
     int chave;
     long int dado1;
@@ -18,6 +22,7 @@ typedef struct {
     char dado3[5000];
 } TipoItem;
 
+//estrutura  representa um bloco de dads trazido do disco para a memória principal
 typedef struct {
     TipoItem itens[ITENSPAGINA];
     int numItens;  
