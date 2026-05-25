@@ -6,7 +6,7 @@
 
 
 int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[],  int numRegistros, long *transferencias, double *tempoCriacao) {
-    // Comeca a contar o tempo de criacao (exigencia dos quesitos de analise) [cite: 675]
+    // Comeca a contar o tempo de criacao 
     double inicio = now_seconds();
     
     FILE *arquivo = fopen(nomeArquivo, "rb");
@@ -26,7 +26,7 @@ int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[],  int numReg
         if (fread(&reg, sizeof(TipoItem), 1, arquivo) == 1) {
             tabela[i].posicao = i;           
             tabela[i].chave = reg.chave;     
-            (*transferencias)++; // Cada leitura no disco conta como 1 transferencia [cite: 674]             
+            (*transferencias)++; // Cada leitura no disco conta como 1 transferencia 
         }
     }
     
@@ -38,8 +38,8 @@ int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[],  int numReg
 }
 
 /*
- * Busca binaria/sequencial APENAS na memoria RAM (no indice criado).
- * Nao conta como transferencia de disco, mas conta comparacoes[cite: 674].
+ * Busca binaria/sequencial APENAS na memoria RAM 
+ * Nao conta como transferencia de disco, mas conta comparacoes
  */
 int buscarPaginaNoIndice(int chave, TipoIndice tabela[], int numPaginas, long *comp) {
     *comp = 0;
@@ -72,14 +72,14 @@ int carregarPagina(const char *nomeArquivo, int numPagina, PaginaAS *paginaAlvo,
     paginaAlvo->numItens = 0;
     TipoItem item;
     
-    // Le todos os itens que cabem na pagina (ex: 4 itens)
+    // Le todos os itens que cabem na pagina 
     for (int i = 0; i < ITENSPAGINA; i++) {
         int posRegistro = numPagina * ITENSPAGINA + i;
         if (posRegistro >= numRegistros) break; // Protecao para a ultima pagina que pode estar incompleta
         
         if (fread(&item, sizeof(TipoItem), 1, arquivo) == 1) {
             paginaAlvo->itens[paginaAlvo->numItens++] = item;
-            (*transferencias)++;  // Contabiliza a leitura fisica [cite: 674]
+            (*transferencias)++;  // Contabiliza a leitura fisica 
         }
     }
     
@@ -88,7 +88,7 @@ int carregarPagina(const char *nomeArquivo, int numPagina, PaginaAS *paginaAlvo,
 }
 
 /*
- * Procura a chave no array que ja esta carregado na struct PaginaAS (na RAM).
+ * Procura a chave no array que ja esta carregado na struct PaginaAS 
  */
 int buscarNaPagina(int chave, PaginaAS *pag, long *comp, TipoItem *resultado) {
     for (int i = 0; i < pag->numItens; i++) {
@@ -98,7 +98,7 @@ int buscarNaPagina(int chave, PaginaAS *pag, long *comp, TipoItem *resultado) {
             return 1; // Sucesso
         }
     }
-    return 0; // Deu ruim, chave nao ta aqui
+    return 0; // sea chave nao estiver aqui
 }
 
 /*
@@ -151,13 +151,13 @@ void lerArquivoSequencial(const char *nomeArquivo, int quantidade, int chave, lo
         }
     }
     
-    if (criadoAgora) free(indiceLocal); // Limpa a memoria pra nao dar vazamento (memory leak)
+    if (criadoAgora) free(indiceLocal); // Limpa a memoria pra nao dar vazamento 
     
     double fim = now_seconds();
     *tempo = ((double)(fim - inicio));
 }
 
-// === FUNÇÃO DA FASE 2: ALTERADA DE 20 PARA 10 CHAVES CONFORME PDF  ===
+//FUNÇÃO DA FASE 2
 void pesquisar10AleatoriasSI(const char *nomeArquivo, int quantidade) {
     FILE *arquivo = fopen(nomeArquivo, "rb");
     if (!arquivo) return;
@@ -220,7 +220,7 @@ void executarSequencial(const char *nomeArquivo, int quantidade, int chave, int 
         return;
     }
 
-    // Se o usuario passou o [-P] no terminal, imprime as chaves primeiro [cite: 687]
+    // Se o usuario passou o [-P] no terminal, imprime as chaves primeiro 
     if (imprimirChaves) {
         printf("\nChaves do arquivo:\n");
         FILE *arquivo = fopen(nomeArquivo, "rb");
@@ -229,7 +229,7 @@ void executarSequencial(const char *nomeArquivo, int quantidade, int chave, int 
         // Le e imprime sem carregar tudo na memoria de uma vez
         while (count < quantidade && fread(&item, sizeof(TipoItem), 1, arquivo) == 1) {
             printf("%d ", item.chave);
-            if ((count + 1) % 10 == 0) printf("\n"); // Quebra linha pra nao ficar uma tripa gigante
+            if ((count + 1) % 10 == 0) printf("\n"); // Quebra linha 
             count++;
         }
         printf("\n");
@@ -245,7 +245,7 @@ void executarSequencial(const char *nomeArquivo, int quantidade, int chave, int 
     // Executa a busca passando NULL no indice para forcar a criacao dele
     lerArquivoSequencial(nomeArquivo, quantidade, chave, &transferencias, &comp, &tempo, &resultado, &encontrado, NULL, 0);
 
-    // Se achou, printa o registro completo exigido pelo enunciado [cite: 688, 671]
+    // Se achou, printa o registro completo exigido pelo enunciado 
     if (encontrado) {
         printf(">>> CHAVE ENCONTRADA <<<\n");
         printf("Chave: %d | Dado1: %ld\n", resultado.chave, resultado.dado1);
