@@ -1,0 +1,2 @@
+gcc gerador.c tempo.c -o gerador -Wall
+gcc main.c acessoSequencial.c arvorebinaria.c arvoreb.c arvorebestrela.c tempo.c -o pesquisa -Wall
