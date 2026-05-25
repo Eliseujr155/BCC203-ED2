@@ -13,11 +13,11 @@ Registro* pesquisa(Pagina *pagina, int chave, long *comp) {
         }
         (*comp)++;
         if (i < pagina->n && chave == pagina->registro[i].chave) {
-            return &pagina->registro[i];
+            return &pagina->registro[i]; //achou
         }
-        pagina = pagina->filhos[i];
+        pagina = pagina->filhos[i]; //filho correspondente continua no while
     }
-    return NULL;
+    return NULL; // chave não existe na arvore
 }
 
 void InsereNaPagina(Pagina *ap, Registro Reg, Pagina *apDir){
