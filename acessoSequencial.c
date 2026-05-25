@@ -6,14 +6,13 @@
 
 
 int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[],  int numRegistros, long *transferencias, double *tempoCriacao) {
-    // Comeca a contar o tempo de criacao 
     double inicio = now_seconds();
     
     FILE *arquivo = fopen(nomeArquivo, "rb");
     if (!arquivo) return 0; // Se der erro na leitura, aborta
     
     *transferencias = 0;
-    // Truque padrao em C para arredondar a divisao inteira pra cima
+    // Truque para arredondar a divisao inteira pra cima
     int numPaginas = (numRegistros + ITENSPAGINA - 1) / ITENSPAGINA;
     TipoItem reg;
     
@@ -38,19 +37,19 @@ int criarIndicePaginas(const char *nomeArquivo, TipoIndice tabela[],  int numReg
 }
 
 /*
- * Busca binaria/sequencial APENAS na memoria RAM 
- * Nao conta como transferencia de disco, mas conta comparacoes
+  Busca binaria/sequencial APENAS na memoria RAM 
+  Nao conta como transferencia de disco, mas conta comparacoes
  */
 int buscarPaginaNoIndice(int chave, TipoIndice tabela[], int numPaginas, long *comp) {
-    *comp = 0;
-    int paginaAlvo = -1;
+    *comp = 0; 
+    int paginaAlvo = -1; //não achou nada ainda
     
-    for (int i = 0; i < numPaginas; i++) {
-        (*comp)++;
-        // Verifica se a chave ta no intervalo da pagina atual ou se eh a ultima pagina
-        if (i == numPaginas - 1 || chave < tabela[i + 1].chave) {
-            if (chave >= tabela[i].chave) {
-                paginaAlvo = tabela[i].posicao;
+    for (int i = 0; i < numPaginas; i++) { 
+        (*comp)++; //Começa a varrer o índice na RAM e incrementa a contagem de comparações
+
+        if (i == numPaginas - 1 || chave < tabela[i + 1].chave) { //verifica se chegamos na última página ou se a chave procurada é menor que o início da próxima
+            if (chave >= tabela[i].chave) { // verifica se não e menor que inicio da pag a atual
+                paginaAlvo = tabela[i].posicao; //salva posição
             }
             break; // Achou a pagina possivel, para de procurar
         }
@@ -58,26 +57,24 @@ int buscarPaginaNoIndice(int chave, TipoIndice tabela[], int numPaginas, long *c
     return paginaAlvo;
 }
 
-/*
- * Puxa uma pagina inteira do HD/SSD para a memoria principal.
- */
+//Puxa uma pagina inteira do HD/SSD para a memoria principal.
 int carregarPagina(const char *nomeArquivo, int numPagina, PaginaAS *paginaAlvo, int numRegistros, long *transferencias) {
     FILE *arquivo = fopen(nomeArquivo, "rb");
     if (!arquivo) return 0;
     
     // Posiciona o ponteiro no byte exato onde a pagina comeca
     long posArquivo = (long)numPagina * ITENSPAGINA * sizeof(TipoItem);
-    fseek(arquivo, posArquivo, SEEK_SET);
+    fseek(arquivo, posArquivo, SEEK_SET); // fazendo um salto preciso indo direto pra pagina correta 
     
     paginaAlvo->numItens = 0;
     TipoItem item;
     
-    // Le todos os itens que cabem na pagina 
+    // Le todos os 4 itens que cabem na pagina 
     for (int i = 0; i < ITENSPAGINA; i++) {
         int posRegistro = numPagina * ITENSPAGINA + i;
-        if (posRegistro >= numRegistros) break; // Protecao para a ultima pagina que pode estar incompleta
+        if (posRegistro >= numRegistros) break; // Protecao para a ultima pagina que pode estar incompleta evitando ler lixo de memoria 
         
-        if (fread(&item, sizeof(TipoItem), 1, arquivo) == 1) {
+        if (fread(&item, sizeof(TipoItem), 1, arquivo) == 1) { //vai tudp pra paginaAlvo
             paginaAlvo->itens[paginaAlvo->numItens++] = item;
             (*transferencias)++;  // Contabiliza a leitura fisica 
         }
@@ -87,12 +84,10 @@ int carregarPagina(const char *nomeArquivo, int numPagina, PaginaAS *paginaAlvo,
     return paginaAlvo->numItens > 0;
 }
 
-/*
- * Procura a chave no array que ja esta carregado na struct PaginaAS 
- */
+//Procura a chave no array que ja esta carregado na struct PaginaAS 
 int buscarNaPagina(int chave, PaginaAS *pag, long *comp, TipoItem *resultado) {
     for (int i = 0; i < pag->numItens; i++) {
-        (*comp)++; // Mais comparacoes de chaves
+        (*comp)++; 
         if (pag->itens[i].chave == chave) {
             *resultado = pag->itens[i]; // Copia o registro todo pra variavel de retorno
             return 1; // Sucesso
@@ -102,11 +97,13 @@ int buscarNaPagina(int chave, PaginaAS *pag, long *comp, TipoItem *resultado) {
 }
 
 /*
- * Funcao orquestradora: junta o indice, carrega a pagina e faz a busca.
- * Tambem gerencia a alocacao do indice caso ele nao venha pronto.
+  Funcao orquestradora: junta o indice, carrega a pagina e faz a busca.
+  Tambem gerencia a alocacao do indice caso ele nao venha pronto.
  */
 void lerArquivoSequencial(const char *nomeArquivo, int quantidade, int chave, long *transferencias, long *comp, double *tempo, TipoItem *resultado, int *encontrado, TipoIndice *tabelaIndice, int numPaginas) {
     double inicio = now_seconds();
+
+    //preparando ponteiros locais para trabalhar com o índice
     *transferencias = 0;
     *comp = 0;
     *encontrado = 0;
