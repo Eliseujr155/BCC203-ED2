@@ -33,28 +33,30 @@ Registro* pesquisaBEstrela(PaginaEstrela *pagina, int chave, long *comparacoes) 
 
     if(pagina->tipo == Interna) {
         i = 1;
+        //mesma forma da B, percorre enquanto não chegar no final e chave buscada maior que avaliada
         while (i <= pagina->conteudo.interna.numChaves && chave > pagina->conteudo.interna.chaves[i - 1]) {
             i++;
             (*comparacoes)++; 
         }
         (*comparacoes)++; 
         if (i <= pagina->conteudo.interna.numChaves && chave <= pagina->conteudo.interna.chaves[i-1]) {
-            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i-1], chave, comparacoes);
+            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i-1], chave, comparacoes); // se menor ou igual entra no filho esquerdo
         } else {
-            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i], chave, comparacoes);
+            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i], chave, comparacoes); // se não, entra no filho direito
         }
     } 
-    else {
+    else { // página externa
         i = 1;
+        // compara com registros da página da mesma forma de antes
         while (i <= pagina->conteudo.externa.numRegistros && chave > pagina->conteudo.externa.registros[i - 1].chave) {
             i++;
             (*comparacoes)++; 
         }
         (*comparacoes)++; 
         if (i <= pagina->conteudo.externa.numRegistros && chave == pagina->conteudo.externa.registros[i - 1].chave) {
-            return &pagina->conteudo.externa.registros[i - 1]; 
+            return &pagina->conteudo.externa.registros[i - 1]; // achou
         }
-        return NULL; 
+        return NULL; // não achou
     }
 }
 
