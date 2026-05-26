@@ -30,33 +30,34 @@ void insereNaPaginaExterna(PaginaEstrela *pagina, Registro reg) {
 
 Registro* pesquisaBEstrela(PaginaEstrela *pagina, int chave, long *comparacoes) {
     int i;
-    if(pagina == NULL) return NULL;
+    if (pagina == NULL) return NULL;
 
-    if(pagina->tipo == Interna) {
-        i = 1;
-        //mesma forma da B, percorre enquanto não chegar no final e chave buscada maior que avaliada
-        while (i <= pagina->conteudo.interna.numChaves && chave > pagina->conteudo.interna.chaves[i - 1]) {
+    if (pagina->tipo == Interna) {
+        i = 0;
+        // percorre até o final enquanto chave for maior que registros avaliados
+        while (i < pagina->conteudo.interna.numChaves && chave > pagina->conteudo.interna.chaves[i]) {
             i++;
             (*comparacoes)++; 
         }
         (*comparacoes)++; 
-        if (i <= pagina->conteudo.interna.numChaves && chave <= pagina->conteudo.interna.chaves[i-1]) {
-            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i-1], chave, comparacoes); // se menor ou igual entra no filho esquerdo
-        } else {
-            return pesquisaBEstrela(pagina->conteudo.interna.filhos[i], chave, comparacoes); // se não, entra no filho direito
-        }
+
+        // entra no filho do respectivo registro avaliado
+        return pesquisaBEstrela(pagina->conteudo.interna.filhos[i], chave, comparacoes);
     } 
     else { // página externa
-        i = 1;
-        // compara com registros da página da mesma forma de antes
-        while (i <= pagina->conteudo.externa.numRegistros && chave > pagina->conteudo.externa.registros[i - 1].chave) {
+        i = 0;
+        // varre os registros na página folha
+        while (i < pagina->conteudo.externa.numRegistros && chave > pagina->conteudo.externa.registros[i].chave) {
             i++;
             (*comparacoes)++; 
         }
-        (*comparacoes)++; 
-        if (i <= pagina->conteudo.externa.numRegistros && chave == pagina->conteudo.externa.registros[i - 1].chave) {
-            return &pagina->conteudo.externa.registros[i - 1]; // achou
+        (*comparacoes)++;
+
+        // verifica se o registro onde o laço parou é a chave desejada
+        if (i < pagina->conteudo.externa.numRegistros && chave == pagina->conteudo.externa.registros[i].chave) {
+            return &pagina->conteudo.externa.registros[i]; // achou
         }
+        
         return NULL; // não achou
     }
 }
