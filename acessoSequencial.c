@@ -208,9 +208,8 @@ void pesquisar10AleatoriasSI(const char *nomeArquivo, int quantidade) {
     free(tabelaIndice);
 }
 
-/*
- * Interface chamada pela main. Trata os argumentos passados pelo console.
- */
+// Interface chamada pela main. Trata os argumentos passados pelo console.
+ 
 void executarSequencial(const char *nomeArquivo, int quantidade, int chave, int modoTeste, int imprimirChaves) {
     if (modoTeste) {
         pesquisar10AleatoriasSI(nomeArquivo, quantidade);
