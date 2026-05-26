@@ -44,7 +44,7 @@ void Ins(Registro reg, Pagina *ap, short *cresceu, Registro *regRetorno, Pagina 
         return;
     }
 
-    while (i < ap->n && reg.chave > ap->registro[i].chave){
+    while (i < ap->n && reg.chave > ap->registro[i].chave){ //compara registros
         (*comp)++;
         i++;
     }
@@ -52,39 +52,39 @@ void Ins(Registro reg, Pagina *ap, short *cresceu, Registro *regRetorno, Pagina 
     if (i < ap->n && reg.chave == ap->registro[i].chave) {
         (*comp)++;
         *cresceu = FALSE;
-        return;
+        return; //se chave já existe na arvore, apenas retorna sem adicionar nada
     }
 
-    Ins(reg, ap->filhos[i], cresceu, regRetorno, apRetorno, comp);
+    Ins(reg, ap->filhos[i], cresceu, regRetorno, apRetorno, comp); //entra no filho do registro correspondente a sua iteração
 
-    if (!*cresceu) return;
+    if (!*cresceu) return; //garante que a função termine caso cresceu falso na chamada recursiva
 
     if(ap->n < MM){
-        InsereNaPagina(ap, *regRetorno, *apRetorno);
+        InsereNaPagina(ap, *regRetorno, *apRetorno); //caso ainda caiba na página apenas insere o registro nela
         *cresceu = FALSE;
         return;
     }
 
-    apTemp = (Pagina *) malloc(sizeof(Pagina));
+    apTemp = (Pagina *) malloc(sizeof(Pagina)); //cria página temporária
     apTemp->n = 0;
     apTemp->filhos[0] = NULL;
 
     if (i < ORDEM + 1){
-        InsereNaPagina(apTemp, ap->registro[MM - 1], ap->filhos[MM]);
-        ap->n--;
-        InsereNaPagina(ap, *regRetorno, *apRetorno);
+        InsereNaPagina(apTemp, ap->registro[MM - 1], ap->filhos[MM]); //move maior registro pra nova página para liberar espaço na página original
+        ap->n--; //diminui n da página original pois um registro foi removido
+        InsereNaPagina(ap, *regRetorno, *apRetorno); //coloca o novo registro na página original
     } else {
-        InsereNaPagina(apTemp, *regRetorno, *apRetorno);
+        InsereNaPagina(apTemp, *regRetorno, *apRetorno); //pega o novo registro e coloca na página nova
     }
 
     for (j = ORDEM + 1; j < MM; j++) {
-        InsereNaPagina(apTemp, ap->registro[j], ap->filhos[j + 1]);
+        InsereNaPagina(apTemp, ap->registro[j], ap->filhos[j + 1]); //move todos os registro maiores que m+1 na nova página
     }
 
-    ap->n = ORDEM;  
-    apTemp->filhos[0] = ap->filhos[ORDEM + 1];  
-    *regRetorno = ap->registro[ORDEM];  
-    *apRetorno  = apTemp;
+    ap->n = ORDEM; //corta página pela metade
+    apTemp->filhos[0] = ap->filhos[ORDEM + 1]; //ponteiro direito do registro que sobe vira o primeiro ponteiro da nova página
+    *regRetorno = ap->registro[ORDEM]; //aponta que registro do meio deve subir pro nó pai
+    *apRetorno  = apTemp; //aponta página que foi gerada
 }
 
 void Insere(Registro reg, Pagina **ap, long *comp) {
