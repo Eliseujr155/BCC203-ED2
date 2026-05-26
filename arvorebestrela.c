@@ -74,7 +74,9 @@ void insBEstrela(Registro reg, PaginaEstrela *pagina, short *cresceu, Registro *
         (*comparacoes)++;
         
         insBEstrela(reg, pagina->conteudo.interna.filhos[i], cresceu, regRetorno, paginaRetorno, comparacoes);
-        if (!*cresceu) return;
+        if (!*cresceu) return; // garante que função termine caso cresceu falso na chamada recursiva
+
+        // cresceu verdadeiro sinaliza que houve split na página externa
 
         if (pagina->conteudo.interna.numChaves < MM_ESTRELA) {
             insereNaPaginaInterna(pagina, regRetorno->chave, *paginaRetorno);
@@ -82,32 +84,35 @@ void insBEstrela(Registro reg, PaginaEstrela *pagina, short *cresceu, Registro *
             return;
         }
 
+        // cria página temporária
         paginaTemp = (PaginaEstrela *) malloc(sizeof(PaginaEstrela));
         paginaTemp->tipo = Interna;
         paginaTemp->conteudo.interna.numChaves = 0;
         paginaTemp->conteudo.interna.filhos[0] = NULL;
 
+        // variáveis auxiliares para reg/pag retorno
         int chaveInserir = regRetorno->chave;
         PaginaEstrela *ponteiroInserir = *paginaRetorno;
 
         if (i < ORDEM_ESTRELA + 1) {
-            insereNaPaginaInterna(paginaTemp, pagina->conteudo.interna.chaves[MM_ESTRELA - 1], pagina->conteudo.interna.filhos[MM_ESTRELA]);
-            pagina->conteudo.interna.numChaves--;
-            insereNaPaginaInterna(pagina, chaveInserir, ponteiroInserir);
+            insereNaPaginaInterna(paginaTemp, pagina->conteudo.interna.chaves[MM_ESTRELA - 1], pagina->conteudo.interna.filhos[MM_ESTRELA]); // move ultimo registro da página para página nova
+            pagina->conteudo.interna.numChaves--; // diminui n pois registro foi removido
+            insereNaPaginaInterna(pagina, chaveInserir, ponteiroInserir); // adiciona novo registro
         } else {
-            insereNaPaginaInterna(paginaTemp, chaveInserir, ponteiroInserir);
+            insereNaPaginaInterna(paginaTemp, chaveInserir, ponteiroInserir); // pega novo registro e coloca na nova página
         }
 
         for (j = ORDEM_ESTRELA + 1; j < MM_ESTRELA; j++) {
-            insereNaPaginaInterna(paginaTemp, pagina->conteudo.interna.chaves[j], pagina->conteudo.interna.filhos[j + 1]);
+            insereNaPaginaInterna(paginaTemp, pagina->conteudo.interna.chaves[j], pagina->conteudo.interna.filhos[j + 1]); // move todos os registros maiores que m+1 pra nova página
         }
 
-        pagina->conteudo.interna.numChaves = ORDEM_ESTRELA; 
-        paginaTemp->conteudo.interna.filhos[0] = pagina->conteudo.interna.filhos[ORDEM_ESTRELA + 1]; 
-        regRetorno->chave = pagina->conteudo.interna.chaves[ORDEM_ESTRELA];
-        *paginaRetorno = paginaTemp;
+        pagina->conteudo.interna.numChaves = ORDEM_ESTRELA; //define tamanho da página original como tamanho da ordem
+        paginaTemp->conteudo.interna.filhos[0] = pagina->conteudo.interna.filhos[ORDEM_ESTRELA + 1]; // ponteiro direito do registro
+        regRetorno->chave = pagina->conteudo.interna.chaves[ORDEM_ESTRELA]; // aponta registro que deve subir
+        *paginaRetorno = paginaTemp; // aponta página que foi gerada
         return; 
     }
+    // página externa, mesma ideia de antes mas na página externa
     else {
         *regRetorno = reg;
         i = 0;
@@ -119,15 +124,16 @@ void insBEstrela(Registro reg, PaginaEstrela *pagina, short *cresceu, Registro *
         if (i < pagina->conteudo.externa.numRegistros && reg.chave == pagina->conteudo.externa.registros[i].chave) {
             (*comparacoes)++;
             *cresceu = FALSO; 
-            return;
+            return; // registro existe na arvore, não precisa adicionar novamente
         }
 
         if (pagina->conteudo.externa.numRegistros < MM_ESTRELA) {
-            insereNaPaginaExterna(pagina, reg);
+            insereNaPaginaExterna(pagina, reg); // tem espaço na página, apenas insere nela
             *cresceu = FALSO; 
             return;
         }
 
+        // página temporária
         paginaTemp = (PaginaEstrela *) malloc(sizeof(PaginaEstrela));
         paginaTemp->tipo = Externa;
         paginaTemp->conteudo.externa.numRegistros = 0;
@@ -144,10 +150,10 @@ void insBEstrela(Registro reg, PaginaEstrela *pagina, short *cresceu, Registro *
             insereNaPaginaExterna(paginaTemp, pagina->conteudo.externa.registros[j]);
         }
 
-        pagina->conteudo.externa.numRegistros = ORDEM_ESTRELA + 1; 
+        pagina->conteudo.externa.numRegistros = ORDEM_ESTRELA + 1; // o + 1 mantém o registro que sobre também na página externa
         *regRetorno = pagina->conteudo.externa.registros[ORDEM_ESTRELA]; 
         *paginaRetorno = paginaTemp;
-        *cresceu = VERDADEIRO; 
+        *cresceu = VERDADEIRO; // sinaliza que um registro precisa ser copiado pra cima
         return;
     }
 }
@@ -158,6 +164,7 @@ void insereBEstrela(Registro reg, PaginaEstrela **raiz, long *comparacoes) {
     PaginaEstrela *paginaRetorno;
     PaginaEstrela *paginaTemp;
 
+    //cria árvore caso não exista
     if (*raiz == NULL) {
         paginaTemp = (PaginaEstrela *) malloc(sizeof(PaginaEstrela));
         paginaTemp->tipo = Externa;
@@ -168,7 +175,8 @@ void insereBEstrela(Registro reg, PaginaEstrela **raiz, long *comparacoes) {
     }
 
     insBEstrela(reg, *raiz, &cresceu, &regRetorno, &paginaRetorno, comparacoes);
-
+    // caso a variável cresceu voltar como verdadeira, o ultimo split feito está retornando um reg retorno que não tem pra onde ir
+    // deve ser criado nova raiz
     if (cresceu) {
         paginaTemp = (PaginaEstrela *) malloc(sizeof(PaginaEstrela));
         paginaTemp->tipo = Interna;
@@ -185,15 +193,17 @@ void lerArquivoArvoreBEstrela(const char *nomeArquivo, int numRegistros, PaginaE
     if (arquivo == NULL) return;
     
     Registro reg;
+    //inicializa estatísticas
     int registrosLidos = 0;
     *transferencias = 0;
     *comparacoes = 0;
     *raiz = NULL;
     
     double inicio = now_seconds();
+    // lê registros enquanto for menor que número pedido
     while (registrosLidos < numRegistros && fread(&reg, sizeof(Registro), 1, arquivo) == 1) {
         (*transferencias)++;
-        insereBEstrela(reg, raiz, comparacoes); 
+        insereBEstrela(reg, raiz, comparacoes); // insere na árvore cada registro lido
         registrosLidos++;
     }
     double fim = now_seconds();
@@ -213,14 +223,14 @@ void pesquisar10AleatoriasBEstrela(const char *nomeArquivo, int numRegistros, Pa
     for (int i = 0; i < 10; i++) {
         int posicao = rand() % numRegistros;
         arquivo = fopen(nomeArquivo, "rb");
-        fseek(arquivo, posicao * sizeof(Registro), SEEK_SET);
-        fread(&reg, sizeof(Registro), 1, arquivo);
+        fseek(arquivo, posicao * sizeof(Registro), SEEK_SET); // acha registro no arquivo
+        fread(&reg, sizeof(Registro), 1, arquivo); // lê registro no arquivo
         transferencias++;
         fclose(arquivo);
         
         long comparacoes = 0;
         double inicio = now_seconds();
-        Registro *resultado = pesquisaBEstrela(raiz, reg.chave, &comparacoes);
+        Registro *resultado = pesquisaBEstrela(raiz, reg.chave, &comparacoes); // busca chave na árvore
         double fim = now_seconds();
 
         comparacoesTotal += comparacoes;
@@ -249,9 +259,10 @@ void executarArvoreBEstrela(const char *nomeArquivo, int quantidade, int chave, 
         FILE *arquivo = fopen(nomeArquivo, "rb");
         Registro reg;
         int contador = 0;
+        // lê registros até determinada quantidade
         while (contador < quantidade && fread(&reg, sizeof(Registro), 1, arquivo) == 1) {
             printf("%d ", reg.chave);
-            if ((contador + 1) % 10 == 0) printf("\n");
+            if ((contador + 1) % 10 == 0) printf("\n"); // quebra linha a cada 10 linhas
             contador++;
         }
         printf("\n");
@@ -271,7 +282,7 @@ void executarArvoreBEstrela(const char *nomeArquivo, int quantidade, int chave, 
     long comparacoesBusca = 0;
     
     double inicio = now_seconds();
-    Registro *resultado = pesquisaBEstrela(raiz, chave, &comparacoesBusca);
+    Registro *resultado = pesquisaBEstrela(raiz, chave, &comparacoesBusca); // pesquisa chave na árvore
     double fim = now_seconds();
     
     double tempoBusca = fim - inicio;
