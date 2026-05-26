@@ -99,6 +99,7 @@ Registro* buscarEmArquivo(const char *nomeArquivoArvore, int chave, long *comp, 
     *transferencias = 0;
 
     while (posicao != -1){
+        //cada passo que a árvore dá para a esquerda ou para a direita custa uma leitura no hd
         fseek(arq, posicao * sizeof(NoArquivo), SEEK_SET);
         if (fread(&no, sizeof(NoArquivo), 1, arq) != 1){
             fclose(arq);
