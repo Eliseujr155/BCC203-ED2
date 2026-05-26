@@ -22,7 +22,7 @@ void criarArvoreBinaria(const char *nomeArquivoArvore){
 // Funcao auxiliar para carregar um no especifico para a RAM usando fseek
 NoArquivo lerNo(FILE *arquivo, long posicao){
     NoArquivo no;
-    fseek(arquivo, posicao * sizeof(NoArquivo), SEEK_SET);
+    fseek(arquivo, posicao * sizeof(NoArquivo), SEEK_SET); // faz a multiplicação pra achar o no especifico 
     fread(&no, sizeof(NoArquivo), 1, arquivo);
     return no;
 }
