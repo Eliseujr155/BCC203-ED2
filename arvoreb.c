@@ -177,9 +177,10 @@ void executarArvoreB(const char *nomeArquivo, int quantidade, int chave, int mod
         FILE *arquivo = fopen(nomeArquivo, "rb");
         Registro reg;
         int contador = 0;
+        // lê registros até determinada quantidade
         while (contador < quantidade && fread(&reg, sizeof(Registro), 1, arquivo) == 1) {
             printf("%d ", reg.chave);
-            if ((contador + 1) % 10 == 0) printf("\n");
+            if ((contador + 1) % 10 == 0) printf("\n"); //quebra a linha a cada 10 chaves
             contador++;
         }
         printf("\n");
@@ -199,7 +200,7 @@ void executarArvoreB(const char *nomeArquivo, int quantidade, int chave, int mod
     long compBusca = 0;
     
     double inicio = now_seconds();
-    Registro *resultado = pesquisa(raiz, chave, &compBusca);
+    Registro *resultado = pesquisa(raiz, chave, &compBusca); // pesquisa chave na arvore
     double fim = now_seconds();
     
     double tempoBusca = fim - inicio;
