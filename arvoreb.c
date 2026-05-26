@@ -7,6 +7,7 @@ Registro* pesquisa(Pagina *pagina, int chave, long *comp) {
     int i;
     while (pagina != NULL) {
         i = 0;
+        // compara enquanto não chegarmos ao final da página e a chave buscada ser maior que a avaliada
         while (i < pagina->n && chave > pagina->registro[i].chave) {
             i++;
             (*comp)++;
