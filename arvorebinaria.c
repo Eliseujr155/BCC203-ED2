@@ -110,7 +110,7 @@ Registro* buscarEmArquivo(const char *nomeArquivoArvore, int chave, long *comp, 
         (*comp)++; 
 
         if (chave == no.registro.chave){
-            Registro *regRetorno = malloc(sizeof(Registro));
+            Registro *regRetorno = malloc(sizeof(Registro)); // garante quwe a chave achada seja copiado o registro completo pra emmoria 
             *regRetorno = no.registro;
             fclose(arq);
             return regRetorno;
