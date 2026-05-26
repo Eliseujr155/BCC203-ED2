@@ -111,15 +111,17 @@ void lerArquivoArvoreB(const char *nomeArquivo, int numRegistros, Pagina **raiz,
     if (arquivo == NULL) return;
     
     Registro reg;
+    // inicializa estatisticas
     int registrosLidos = 0;
     *transferencias = 0;
     *comp = 0;
     *raiz = NULL;
     
     double inicio = now_seconds();
+    // lê registros enquanto for menor que número pedido
     while (registrosLidos < numRegistros && fread(&reg, sizeof(Registro), 1, arquivo) == 1) {
         (*transferencias)++;
-        Insere(reg, raiz, comp);
+        Insere(reg, raiz, comp); // insere na arvore cada registro lido
         registrosLidos++;
     }
     double fim = now_seconds();
@@ -141,12 +143,12 @@ void pesquisar10AleatoriasB(const char *nomeArquivo, int numRegistros, Pagina *r
         arquivo = fopen(nomeArquivo, "rb");
         fseek(arquivo, posicao * sizeof(Registro), SEEK_SET);
         fread(&reg, sizeof(Registro), 1, arquivo);
-        transferencias++; // Conta como 1 transferencia carregar a chave de teste
+        transferencias++; 
         fclose(arquivo);
         
         long comp = 0;
         double inicio = now_seconds();
-        Registro *resultado = pesquisa(raiz, reg.chave, &comp);
+        Registro *resultado = pesquisa(raiz, reg.chave, &comp); //busca chave na arvore
         double fim = now_seconds();
         
         compTotal += comp;
@@ -160,7 +162,6 @@ void pesquisar10AleatoriasB(const char *nomeArquivo, int numRegistros, Pagina *r
     }
     
     printf("\n=== RESULTADOS MEDIOS DA PESQUISA (FASE 2) ===\n");
-    // Transferencias em arvore B 100% RAM e zero na busca, a não ser a propria leitura da raiz/teste
     printf("Media de transferencias p/ pegar chave: %ld\n", transferencias / 10); 
     printf("Media de comparacoes: %ld\n", compTotal / 10);
     printf("Tempo medio de pesquisa: %.6f s\n", tempoTotal / 10.0);
