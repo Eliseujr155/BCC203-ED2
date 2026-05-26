@@ -94,7 +94,8 @@ void Insere(Registro reg, Pagina **ap, long *comp) {
     Pagina *apTemp;
 
     Ins(reg, *ap, &cresceu, &regRetorno, &apRetorno, comp);
-
+// caso a variável cresceu voltar como verdadeira, o ultimo split feito está retornando um reg retorno que não tem pra onde ir
+// deve ser criado nova raiz
     if (cresceu) {
         apTemp = (Pagina *) malloc(sizeof(Pagina));
         apTemp->n = 1;
