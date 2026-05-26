@@ -6,17 +6,18 @@
 void insereNaPaginaInterna(PaginaEstrela *pagina, int chave, PaginaEstrela *paginaDireita) {
     int k = pagina->conteudo.interna.numChaves;
     while (k > 0) {
-        if (chave >= pagina->conteudo.interna.chaves[k - 1]) break;
-        pagina->conteudo.interna.chaves[k] = pagina->conteudo.interna.chaves[k - 1];
-        pagina->conteudo.interna.filhos[k + 1] = pagina->conteudo.interna.filhos[k];
+        if (chave >= pagina->conteudo.interna.chaves[k - 1]) break; // chave é maior que maior da página
+        pagina->conteudo.interna.chaves[k] = pagina->conteudo.interna.chaves[k - 1]; // maior registro é passado pra frente
+        pagina->conteudo.interna.filhos[k + 1] = pagina->conteudo.interna.filhos[k]; // filho direito do maior passa pra frente
         k--;   
     }
-    pagina->conteudo.interna.chaves[k] = chave;
-    pagina->conteudo.interna.filhos[k + 1] = paginaDireita;
-    pagina->conteudo.interna.numChaves++;
+    pagina->conteudo.interna.chaves[k] = chave; // coloca chave na frente do antigo maior
+    pagina->conteudo.interna.filhos[k + 1] = paginaDireita; // página acompanha, ficando na sua direita
+    pagina->conteudo.interna.numChaves++; // aumenta qtd de chaves
 }
 
 void insereNaPaginaExterna(PaginaEstrela *pagina, Registro reg) {
+    // mesma coisa da página interna mas sem filhos
     int k = pagina->conteudo.externa.numRegistros;
     while (k > 0) {
         if (reg.chave >= pagina->conteudo.externa.registros[k - 1].chave) break;
