@@ -34,7 +34,7 @@ void escreveNo(FILE *arquivo, long posicao, NoArquivo no){
 }
 
 // Insercao recursiva. 
-// Atencao: se o arquivo estiver ordenado, a arvore degenera para uma lista e causa 
+//  se o arquivo estiver ordenado, a arvore degenera para uma lista e causa 
 // Stack Overflow por causa do limite de recursao do sistema operacional
 long inserirRecursivo(FILE * arquivo, long posicao, Registro reg, long *comp){
     // Achou um espaco livre (-1), entao cria o novo no aqui.
